@@ -5,6 +5,13 @@
  */
 package aplicacionproyectoentornos;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 
 /**
@@ -16,6 +23,11 @@ public class Menu extends javax.swing.JFrame {
     /**
      * Creates new form Menu
      */
+    
+    static public ResultSet r;
+    
+    static public Connection connection;
+    
     public Menu() {
         initComponents();
     }
@@ -119,26 +131,41 @@ public class Menu extends javax.swing.JFrame {
     }//GEN-LAST:event_usuarioActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
-        
-        char passwordArray[] = password.getPassword(); //Para sacar los carácteres del array del pasword 
-        
-        String password_cadena = new String(passwordArray); //Para pasar los carácteres a un String para poder compararlo y validar el inicio de sesión
-        
-        //A PARTIR DE AQUÍ, EDITAR PARA CONECTAR CON LOS USUARIOS DE LA BASE DE DE DATOS, LOS USUARIOS ESTARÁN EN UNA TABLA.
-        
-        if (usuario.getText().equals("encargado") && password_cadena.equals("encargado")) {
-            Encargado enc = new Encargado();
-            enc.setVisible(true);
-        } else if (usuario.getText().equals("dependiente") && password_cadena.equals("dependiente")) {
-            Dependiente dep = new Dependiente();
-            dep.setVisible(true);
-        } else {
-            JOptionPane.showMessageDialog(null, "ERROR. El usuario o contraseña no son correctos.");
+        try {
+            // TODO add your handling code here:
+            
+            char passwordArray[] = password.getPassword(); //Para sacar los carácteres del array del pasword
+            
+            String password_cadena = new String(passwordArray); //Para pasar los carácteres a un String para poder compararlo y validar el inicio de sesión
+            
+            //A PARTIR DE AQUÍ, EDITAR PARA CONECTAR CON LOS USUARIOS DE LA BASE DE DE DATOS, LOS USUARIOS ESTARÁN EN UNA TABLA.
+            String url = "jdbc:mysql://localhost:3306/tienda_videojuegos";
+            String user = "entornos";
+            String pass = "entornos";
+            connection = DriverManager.getConnection(url, user, pass);
+
+            Statement s = connection.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+            String usu_encargado = "SELECT Usuario FROM Usuarios WHERE Tipo = 1";
+            String pass_encargado = "SELECT Password FROM Usuarios WHERE Tipo = 1";
+            
+            String usu_dependiente = "SELECT Usuario FROM Usuarios WHERE Tipo = 2";
+            String pass_dependiente= "SELECT Password FROM Usuarios WHERE Tipo = 2";
+            
+            if (usuario.getText().equals(usu_encargado) && password_cadena.equals(pass_encargado)) {
+                Encargado enc = new Encargado();
+                enc.setVisible(true);
+            } else if (usuario.getText().equals(usu_dependiente) && password_cadena.equals(pass_dependiente)) {
+                Dependiente dep = new Dependiente();
+                dep.setVisible(true);
+            } else {
+                JOptionPane.showMessageDialog(null, "ERROR. El usuario o contraseña no son correctos.");
+            }
+            
+            usuario.setText(null);
+            password.setText(null);
+        } catch (SQLException ex) {
+            Logger.getLogger(Menu.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
-        usuario.setText(null);
-        password.setText(null);
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void cerrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cerrarActionPerformed
